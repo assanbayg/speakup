@@ -1,0 +1,60 @@
+buildscript {
+    ext.kotlin_version = '2.1.0'
+    repositories {
+        google()
+        mavenCentral()
+    }
+
+    dependencies {
+        classpath 'com.android.tools.build:gradle:8.6.0'
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
+    }
+}
+
+allprojects {
+    repositories {
+        google()
+        mavenCentral()
+    }
+}
+                                                         
+rootProject.buildDir = '../build'
+subprojects {
+    project.buildDir = "${rootProject.buildDir}/${project.name}"
+}
+subprojects {
+    project.evaluationDependsOn(':app')
+}
+
+// Ensure third-party Android library modules (e.g., plugins) have a namespace when using AGP 8+
+// If a library doesn't declare android.namespace, derive it from its AndroidManifest package
+subprojects { subproject ->
+    subproject.plugins.withId('com.android.library') {
+        try {
+            def androidExt = subproject.extensions.findByName('android')
+            if (androidExt != null) {
+                def currentNamespace = null
+                try { currentNamespace = androidExt.namespace } catch (Throwable ignored) { }
+                if (currentNamespace == null || (currentNamespace instanceof String && currentNamespace.trim().isEmpty())) {
+                    def manifestFile = androidExt.sourceSets?.main?.manifest?.srcFile
+                    if (manifestFile == null) {
+                        def candidate = new File(subproject.projectDir, 'src/main/AndroidManifest.xml')
+                        if (candidate.exists()) { manifestFile = candidate }
+                    }
+                    if (manifestFile != null && manifestFile.exists()) {
+                        def manifest = new groovy.xml.XmlSlurper().parse(manifestFile)
+                        def pkg = manifest.@package?.text()
+                        if (pkg) {
+                            androidExt.namespace = pkg
+                            subproject.logger.lifecycle("Applied namespace '${pkg}' for ${subproject.path}")
+                        }
+                    }
+                }
+            }
+        } catch (Throwable ignored) { }
+    }
+}
+
+tasks.register("clean", Delete) {
+    delete rootProject.buildDir
+}

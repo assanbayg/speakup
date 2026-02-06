@@ -1,0 +1,62 @@
+name: speakup
+description: "A new Flutter project."
+publish_to: "none"
+
+version: 1.0.0+2
+
+environment:
+  sdk: ">=3.3.1 <4.0.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  cupertino_icons: ^1.0.6
+  get: ^4.7.3
+  image_picker: ^1.0.7
+
+  audioplayers: ^6.0.0
+  video_player: ^2.8.6
+  permission_handler: ^11.3.1
+  flutter_launcher_icons: ^0.13.1
+  flutter_map: ^8.2.1
+  latlong2: ^0.9.1
+  http: ^1.5.0
+  supabase_flutter: ^2.9.1
+  flutter_dotenv: ^6.0.0
+  dio: ^5.9.0
+  path_provider: ^2.1.5
+  record: ^6.1.2
+  flutter_svg: ^2.2.3
+  http_parser: ^4.1.2
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+
+  flutter_lints: ^3.0.0
+
+flutter_icons:
+  android: true
+  ios: true
+  image_path: "assets/images/logo.png"
+
+flutter:
+  uses-material-design: true
+
+  assets:
+    - .env
+    - assets/images/
+    - assets/icons/
+    - assets/fonts/
+
+  fonts:
+    - family: Quicksand
+      fonts:
+        - asset: assets/fonts/Quicksand-Regular.ttf
+        - asset: assets/fonts/Quicksand-Light.ttf
+          weight: 300
+        - asset: assets/fonts/Quicksand-Medium.ttf
+          weight: 500
+        - asset: assets/fonts/Quicksand-Bold.ttf
+          weight: 700
