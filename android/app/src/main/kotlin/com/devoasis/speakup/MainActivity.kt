@@ -1,4 +1,4 @@
-package com.devoasis.speakup
+package com.speakup.speakup
 
 import io.flutter.embedding.android.FlutterActivity
 

@@ -95,7 +95,7 @@ class _MapScreenState extends State<MapScreen> {
               TileLayer(
                 urlTemplate: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
                 subdomains: const ['a', 'b', 'c'],
-                userAgentPackageName: 'com.devoasis.speakup',
+                userAgentPackageName: 'com.speakup.speakup',
               ),
               MarkerLayer(markers: markers),
             ],
