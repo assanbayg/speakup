@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:get/get.dart';
 import 'package:speakup/features/authentication/controllers/login_controller.dart';
+import 'package:speakup/features/authentication/screens/forgot_password_screen.dart';
 import 'package:speakup/features/authentication/screens/signup_screen.dart';
 import 'package:speakup/util/constants/sizes.dart';
 import 'package:speakup/util/device/device_utility.dart';
@@ -137,7 +138,22 @@ class _LoginScreenState extends State<LoginScreen> {
                     ),
                     obscureText: _obscureText,
                   ),
-                  const SizedBox(height: SSizes.spaceBtwSections),
+                  Align(
+                    alignment: Alignment.centerRight,
+                    child: TextButton(
+                      onPressed: () {
+                        Get.to(() => const ForgotPasswordScreen());
+                      },
+                      child: Text(
+                        "Забыли пароль?",
+                        style: Theme.of(context)
+                            .textTheme
+                            .bodyMedium
+                            ?.copyWith(color: SColors.primary),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: SSizes.spaceBtwInputFields),
                   SizedBox(
                       width: SDeviceUtils.getScreenWidth(context) * .8,
                       child: ElevatedButton.icon(

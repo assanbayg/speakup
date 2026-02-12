@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:speakup/features/speakup/models/user_model.dart';
+import 'package:speakup/features/speakup/screens/main_navigation_screen.dart';
 import 'package:speakup/util/helpers/helper_functions.dart';
 import 'package:speakup/util/helpers/supabase_helper.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -30,10 +31,8 @@ class SignUpController extends GetxController {
         fullName.isEmpty ||
         password.isEmpty ||
         rePassword.isEmpty) {
-      {
-        SHelperFunctions.showSnackBar("Заполните все поля");
-        return;
-      }
+      SHelperFunctions.showSnackBar("Заполните все поля");
+      return;
     }
     if (!SHelperFunctions.isEmailValid(email: email)) {
       SHelperFunctions.showSnackBar("Неверный формат почты");
@@ -63,62 +62,50 @@ class SignUpController extends GetxController {
       isLoading.value = true;
       SHelperFunctions.showProgressIndicator(context);
 
-      // Sign up user with Supabase Auth
+      // Sign up user with Supabase Auth (email confirmation disabled)
       final AuthResponse response = await SSupabaseHelper.auth.signUp(
         email: email,
         password: password,
-        data: {'display_name': fullName}, // Store display name in auth metadata
+        data: {'display_name': fullName},
       );
 
       if (response.user != null) {
-        await uploadUserData(UserModel(
-          id: response.user!.id,
-          displayName: fullName,
-          email: email,
-        ));
+        // Create user row in 'users' table
+        await SSupabaseHelper.client.from('users').insert(
+              UserModel(
+                id: response.user!.id,
+                displayName: fullName,
+                email: email,
+              ).toSupabaseJson(),
+            );
+
         SHelperFunctions.hideProgressIndicator();
         isLoading.value = false;
-        return;
+        SHelperFunctions.showSnackBar('Аккаунт создан!');
+        Get.offAll(() => const MainNavigationScreen());
       }
     } on AuthException catch (e) {
       SHelperFunctions.hideProgressIndicator();
       isLoading.value = false;
 
-      // Refer here later:
-      // https://supabase.com/docs/guides/auth/debugging/error-codes
-      String errorMessage = 'Registration failed';
+      String errorMessage = 'Ошибка регистрации';
       switch (e.code) {
         case 'email_exists':
-          errorMessage = 'An account with this email already exists';
+        case 'user_already_exists':
+          errorMessage = 'Аккаунт с этой почтой уже существует';
           break;
         case 'invalid_credentials':
-          errorMessage = 'Please enter valid credentials';
+          errorMessage = 'Введите корректные данные';
           break;
         default:
-          errorMessage = e.code!;
+          errorMessage = e.message;
       }
 
       SHelperFunctions.showSnackBar(errorMessage);
     } catch (e) {
       SHelperFunctions.hideProgressIndicator();
       isLoading.value = false;
-      SHelperFunctions.showSnackBar('Registration failed: $e');
-    }
-  }
-
-  /// Upload User Data to Supabase Database
-  Future<void> uploadUserData(UserModel user) async {
-    try {
-      await SSupabaseHelper.client.from('users').insert({
-        'id': user.id,
-        'display_name': user.displayName,
-        'email': user.email,
-      });
-    } catch (e) {
-      SHelperFunctions.hideProgressIndicator();
-      isLoading.value = false;
-      SHelperFunctions.showSnackBar("Error uploading user data: $e");
-      rethrow;
+      SHelperFunctions.showSnackBar('Ошибка регистрации: $e');
     }
   }
 
