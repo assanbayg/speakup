@@ -142,13 +142,6 @@ class VoiceController extends GetxController {
       final path = await _recorder.stop();
       await Future.delayed(const Duration(milliseconds: 200));
       if (path != null) {
-        final file = File(path);
-
-        // Verify file
-        print('🔍 File exists: ${await file.exists()}');
-        print('🔍 File size: ${await file.length()} bytes');
-        print('🔍 File path: $path');
-
         // Get duration from actual audio file
         // (show me how you're calculating duration and I'll fix it)
       }

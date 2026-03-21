@@ -15,10 +15,7 @@ class SpeakersScreen extends StatelessWidget {
     final controller = Get.put(SpeakerController());
 
     return Scaffold(
-      appBar: const SAppBar(
-        title: 'Выбор голоса',
-        page: 'Speakers',
-      ),
+      appBar: const SAppBar(title: 'Выбор голоса', page: 'Speakers'),
       body: RefreshIndicator(
         onRefresh: () => controller.loadSpeakers(),
         child: SingleChildScrollView(
@@ -27,14 +24,16 @@ class SpeakersScreen extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Info card
               _buildInfoCard(context),
               const SizedBox(height: SSizes.spaceBtwSections),
-
-              // Speakers list
+              Text('Доступные голоса',
+                  style: Theme.of(context).textTheme.titleLarge),
+              const SizedBox(height: 6),
               Text(
-                'Доступные голоса',
-                style: Theme.of(context).textTheme.titleLarge,
+                'Нажмите ▶ чтобы послушать голос перед выбором',
+                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      color: Colors.grey.shade500,
+                    ),
               ),
               const SizedBox(height: SSizes.spaceBtwItems),
               _buildSpeakersList(context, controller),
@@ -53,10 +52,9 @@ class SpeakersScreen extends StatelessWidget {
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.08),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
-          ),
+              color: Colors.black.withValues(alpha: 0.08),
+              blurRadius: 10,
+              offset: const Offset(0, 4)),
         ],
       ),
       child: Row(
@@ -71,10 +69,8 @@ class SpeakersScreen extends StatelessWidget {
               'assets/icons/Audio.svg',
               width: 24,
               height: 24,
-              colorFilter: const ColorFilter.mode(
-                SColors.primary,
-                BlendMode.srcIn,
-              ),
+              colorFilter:
+                  const ColorFilter.mode(SColors.primary, BlendMode.srcIn),
             ),
           ),
           const SizedBox(width: 12),
@@ -82,16 +78,13 @@ class SpeakersScreen extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  'Голос Спичи',
-                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.w600,
-                      ),
-                ),
-                Text(
-                  'Выберите голос, которым будет говорить Спичи',
-                  style: Theme.of(context).textTheme.bodySmall,
-                ),
+                Text('Голос Спичи',
+                    style: Theme.of(context)
+                        .textTheme
+                        .titleMedium
+                        ?.copyWith(fontWeight: FontWeight.w600)),
+                Text('Выберите голос, которым будет говорить Спичи',
+                    style: Theme.of(context).textTheme.bodySmall),
               ],
             ),
           ),
@@ -105,11 +98,9 @@ class SpeakersScreen extends StatelessWidget {
     return Obx(() {
       if (controller.isLoading.value) {
         return const Center(
-          child: Padding(
-            padding: EdgeInsets.all(32.0),
-            child: CircularProgressIndicator(),
-          ),
-        );
+            child: Padding(
+                padding: EdgeInsets.all(32.0),
+                child: CircularProgressIndicator()));
       }
 
       final speakers = controller.availableSpeakers;
@@ -120,24 +111,16 @@ class SpeakersScreen extends StatelessWidget {
             padding: const EdgeInsets.all(32.0),
             child: Column(
               children: [
-                Icon(
-                  Icons.record_voice_over_outlined,
-                  size: 48,
-                  color: Colors.grey.shade400,
-                ),
+                Icon(Icons.record_voice_over_outlined,
+                    size: 48, color: Colors.grey.shade400),
                 const SizedBox(height: 16),
-                Text(
-                  'Голоса недоступны',
-                  style: TextStyle(
-                    color: Colors.grey.shade600,
-                    fontSize: 16,
-                  ),
-                ),
+                Text('Голоса недоступны',
+                    style:
+                        TextStyle(color: Colors.grey.shade600, fontSize: 16)),
                 const SizedBox(height: 8),
                 TextButton(
-                  onPressed: () => controller.loadSpeakers(),
-                  child: const Text('Попробовать снова'),
-                ),
+                    onPressed: () => controller.loadSpeakers(),
+                    child: const Text('Попробовать снова')),
               ],
             ),
           ),
@@ -149,10 +132,8 @@ class SpeakersScreen extends StatelessWidget {
         physics: const NeverScrollableScrollPhysics(),
         itemCount: speakers.length,
         separatorBuilder: (_, __) => const SizedBox(height: 12),
-        itemBuilder: (context, index) {
-          final speaker = speakers[index];
-          return _buildSpeakerTile(context, controller, speaker);
-        },
+        itemBuilder: (context, index) =>
+            _buildSpeakerTile(context, controller, speakers[index]),
       );
     });
   }
@@ -164,51 +145,54 @@ class SpeakersScreen extends StatelessWidget {
   ) {
     return Obx(() {
       final isSelected = controller.isSelected(speaker);
+      final isPreviewing = controller.isPreviewing(speaker);
+      final isAnyPreviewing = controller.previewingId.value != null;
 
-      return GestureDetector(
-        onTap: () => controller.selectSpeaker(speaker),
-        child: AnimatedContainer(
-          duration: const Duration(milliseconds: 200),
-          padding: const EdgeInsets.all(16),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(16),
-            border: Border.all(
-              color: isSelected ? SColors.primary : Colors.grey.shade200,
-              width: isSelected ? 2 : 1,
-            ),
-            boxShadow: [
-              BoxShadow(
-                color: isSelected
-                    ? SColors.primary.withValues(alpha: 0.15)
-                    : Colors.black.withValues(alpha: 0.05),
-                blurRadius: isSelected ? 12 : 8,
-                offset: const Offset(0, 4),
-              ),
-            ],
+      return AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(
+            color: isSelected ? SColors.primary : Colors.grey.shade200,
+            width: isSelected ? 2 : 1,
           ),
-          child: Row(
-            children: [
-              // Speaker icon
-              Container(
-                width: 50,
-                height: 50,
-                decoration: BoxDecoration(
-                  color: isSelected
-                      ? SColors.primary.withValues(alpha: 0.1)
-                      : Colors.grey.shade100,
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Icon(
-                  Icons.record_voice_over,
-                  color: isSelected ? SColors.primary : Colors.grey.shade600,
-                  size: 24,
-                ),
+          boxShadow: [
+            BoxShadow(
+              color: isSelected
+                  ? SColors.primary.withValues(alpha: 0.15)
+                  : Colors.black.withValues(alpha: 0.05),
+              blurRadius: isSelected ? 12 : 8,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
+        child: Row(
+          children: [
+            // Icon
+            Container(
+              width: 50,
+              height: 50,
+              decoration: BoxDecoration(
+                color: isSelected
+                    ? SColors.primary.withValues(alpha: 0.1)
+                    : Colors.grey.shade100,
+                borderRadius: BorderRadius.circular(12),
               ),
-              const SizedBox(width: 16),
+              child: Icon(
+                Icons.record_voice_over,
+                color: isSelected ? SColors.primary : Colors.grey.shade600,
+                size: 24,
+              ),
+            ),
+            const SizedBox(width: 16),
 
-              // Speaker name
-              Expanded(
+            // Name — tapping here selects the speaker
+            Expanded(
+              child: GestureDetector(
+                onTap: () => controller.selectSpeaker(speaker),
+                behavior: HitTestBehavior.opaque,
                 child: Text(
                   speaker.name,
                   style: TextStyle(
@@ -218,25 +202,81 @@ class SpeakersScreen extends StatelessWidget {
                   ),
                 ),
               ),
+            ),
 
-              // Selection indicator
-              if (isSelected)
-                Container(
+            // Preview button
+            _PreviewButton(
+              isPreviewing: isPreviewing,
+              isLoadingPreview: isAnyPreviewing && !isPreviewing,
+              onTap: () => controller.togglePreview(speaker),
+            ),
+
+            const SizedBox(width: 4),
+
+            // Selection checkmark
+            if (isSelected)
+              Container(
+                padding: const EdgeInsets.all(4),
+                decoration: const BoxDecoration(
+                    color: SColors.primary, shape: BoxShape.circle),
+                child: const Icon(Icons.check, color: Colors.white, size: 16),
+              )
+            else
+              // Tap to select affordance
+              GestureDetector(
+                onTap: () => controller.selectSpeaker(speaker),
+                child: Container(
                   padding: const EdgeInsets.all(4),
-                  decoration: const BoxDecoration(
-                    color: SColors.primary,
+                  decoration: BoxDecoration(
+                    border: Border.all(color: Colors.grey.shade300, width: 2),
                     shape: BoxShape.circle,
                   ),
-                  child: const Icon(
-                    Icons.check,
-                    color: Colors.white,
-                    size: 16,
-                  ),
+                  child: const SizedBox(width: 16, height: 16),
                 ),
-            ],
-          ),
+              ),
+          ],
         ),
       );
     });
+  }
+}
+
+class _PreviewButton extends StatelessWidget {
+  const _PreviewButton({
+    required this.isPreviewing,
+    required this.isLoadingPreview,
+    required this.onTap,
+  });
+
+  final bool isPreviewing;
+  final bool isLoadingPreview;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Tooltip(
+      message: isPreviewing ? 'Остановить' : 'Прослушать',
+      child: InkWell(
+        onTap: isLoadingPreview ? null : onTap,
+        borderRadius: BorderRadius.circular(24),
+        child: Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: AnimatedSwitcher(
+            duration: const Duration(milliseconds: 200),
+            child: isPreviewing
+                ? const Icon(Icons.stop_circle_outlined,
+                    key: ValueKey('stop'), color: SColors.primary, size: 28)
+                : Icon(
+                    Icons.play_circle_outline,
+                    key: const ValueKey('play'),
+                    color: isLoadingPreview
+                        ? Colors.grey.shade300
+                        : SColors.primary,
+                    size: 28,
+                  ),
+          ),
+        ),
+      ),
+    );
   }
 }

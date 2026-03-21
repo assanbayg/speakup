@@ -291,7 +291,6 @@ class VoiceScreen extends StatelessWidget {
     final isRecording = controller.isRecording.value;
     final hasRecording = controller.recordingPath.value != null;
     final isUploading = controller.isUploading.value;
-    final isLoading = controller.isLoading.value;
     final validation = controller.lastValidation.value;
 
     if (isUploading) {

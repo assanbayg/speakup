@@ -11,10 +11,14 @@ class Speaker {
   Speaker({required this.id, required this.name});
 
   factory Speaker.fromJson(String speakerId) {
-    return Speaker(
-      id: speakerId,
-      name: speakerId,
-    );
+    return Speaker(id: speakerId, name: _displayName(speakerId));
+  }
+
+  static String _displayName(String id) {
+    const names = {
+      'default': 'Стандартный голос',
+    };
+    return names[id] ?? id;
   }
 }
 
@@ -22,15 +26,11 @@ class SpeakerService {
   static String get _baseUrl =>
       dotenv.env['BACKEND_URL'] ?? 'http://localhost:8000';
 
-  /// Fetch available TTS speakers from backend
   static Future<List<Speaker>> fetchSpeakers() async {
     try {
       final response = await http
-          .get(
-            Uri.parse('$_baseUrl/speakers'),
-          )
+          .get(Uri.parse('$_baseUrl/speakers'))
           .timeout(const Duration(seconds: 10));
-
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
         final speakerIds = List<String>.from(data['speakers'] ?? []);
@@ -39,10 +39,31 @@ class SpeakerService {
         throw Exception('Failed to fetch speakers: ${response.statusCode}');
       }
     } catch (e) {
-      if (kDebugMode) {
-        print('Error fetching speakers: $e');
-      }
+      if (kDebugMode) print('Error fetching speakers: $e');
       return [];
+    }
+  }
+
+  /// Fetch a short TTS audio preview for a given speaker voice.
+  static Future<List<int>?> previewSpeaker(String speakerId) async {
+    try {
+      final response = await http
+          .post(
+            Uri.parse('$_baseUrl/tts'),
+            headers: {'Content-Type': 'application/json'},
+            body: jsonEncode({
+              'text': 'Привет! Меня зовут Спичи. Давай поговорим!',
+              'voice': speakerId,
+            }),
+          )
+          .timeout(const Duration(seconds: 30));
+      if (response.statusCode == 200 && response.bodyBytes.isNotEmpty) {
+        return response.bodyBytes;
+      }
+      return null;
+    } catch (e) {
+      if (kDebugMode) print('Error previewing speaker: $e');
+      return null;
     }
   }
 }
