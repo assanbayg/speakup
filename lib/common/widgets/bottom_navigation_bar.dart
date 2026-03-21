@@ -48,7 +48,7 @@ class SBottomNavigationBar extends StatelessWidget {
       _buildNavItem(context, 'assets/icons/Message.svg', 'Спичи', 0),
       _buildNavItem(context, 'assets/icons/Convert.svg', 'Конвертер', 1),
       _buildNavItem(context, 'assets/icons/Map.svg', 'Центры', 2),
-      _buildNavItem(context, 'assets/icons/Profile.svg', 'Профайл', 3),
+      _buildNavItem(context, 'assets/icons/Profile.svg', 'Профиль', 3),
     ];
   }
 
