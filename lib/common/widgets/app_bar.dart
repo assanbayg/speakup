@@ -7,11 +7,13 @@ class SAppBar extends StatelessWidget implements PreferredSizeWidget {
     super.key,
     required this.title,
     required this.page,
+    this.subtitle,
     this.actions,
   });
 
   final String title;
   final String page;
+  final String? subtitle;
   final List<Widget>? actions;
 
   @override
@@ -29,12 +31,24 @@ class SAppBar extends StatelessWidget implements PreferredSizeWidget {
               width: double.infinity,
               padding: const EdgeInsets.symmetric(
                   horizontal: SSizes.md, vertical: SSizes.sm / 2),
-              child: Text(
-                title,
-                style: Theme.of(context)
-                    .textTheme
-                    .titleMedium
-                    ?.copyWith(fontWeight: FontWeight.w600),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    style: Theme.of(context)
+                        .textTheme
+                        .titleMedium
+                        ?.copyWith(fontWeight: FontWeight.w600),
+                  ),
+                  if (subtitle != null)
+                    Text(
+                      subtitle!,
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                            color: Colors.grey.shade600,
+                          ),
+                    ),
+                ],
               ),
             ),
           ],

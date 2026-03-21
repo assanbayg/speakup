@@ -44,6 +44,7 @@ class _HomeScreenState extends State<HomeScreen> {
       appBar: const SAppBar(
         page: "Home",
         title: "Привет, я Спичи!",
+        subtitle: "Разговор с персонажем",
       ),
       body: Stack(
         children: [

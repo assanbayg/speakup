@@ -160,6 +160,12 @@ class TextToSpeechController extends GetxController {
       );
 
       if (response.statusCode == 200) {
+        if (response.bodyBytes.isEmpty) {
+          _isThinking.value = false;
+          Get.snackbar('Ошибка TTS', 'Сервер вернул пустой аудиофайл');
+          return;
+        }
+
         // Save audio file
         final audioDir = Directory('$appDocPath/speechOutput');
         if (!await audioDir.exists()) {
@@ -170,24 +176,18 @@ class TextToSpeechController extends GetxController {
             '${audioDir.path}/speech_${DateTime.now().millisecondsSinceEpoch}.mp3');
         await audioFile.writeAsBytes(response.bodyBytes);
 
-        // Play audio
-        await player.play(DeviceFileSource(audioFile.path));
-        await player.pause();
-
-        final duration = player.getDuration();
-        await player.seek(Duration.zero);
-        await player.play(DeviceFileSource(audioFile.path));
-
         _isThinking.value = false;
         _isSpeaking.value = true;
 
-        Duration? durationValue = await duration;
-        if (durationValue != null) {
-          await Future.delayed(durationValue);
-        }
+        final completer = Completer<void>();
+        player.onPlayerComplete.listen((_) {
+          if (!completer.isCompleted) completer.complete();
+        });
+
+        await player.play(DeviceFileSource(audioFile.path));
+        await completer.future;
 
         _isSpeaking.value = false;
-        await player.pause();
 
         // Clean up old audio files to save space
         _cleanupOldAudioFiles(audioDir);

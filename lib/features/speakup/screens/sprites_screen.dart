@@ -501,12 +501,12 @@ class SpritesScreen extends StatelessWidget {
         itemBuilder: (context, index) {
           if (index == 0) {
             // Default Speechy character
-            return _buildSpriteCard(
-              context: context,
-              isDefault: true,
-              isSelected: controller.isUsingDefault,
-              onTap: () => controller.useDefaultCharacter(),
-            );
+            return Obx(() => _buildSpriteCard(
+                  context: context,
+                  isDefault: true,
+                  isSelected: controller.isUsingDefault,
+                  onTap: () => controller.useDefaultCharacter(),
+                ));
           }
 
           final filename = sprites[index - 1];
@@ -514,19 +514,21 @@ class SpritesScreen extends StatelessWidget {
               ? SpriteService.getSpriteImageUrl(userId, filename)
               : null;
 
-          return _buildSpriteCard(
-            context: context,
-            imageUrl: imageUrl,
-            filename: filename,
-            isSelected: controller.isSelected(filename),
-            onTap: () => controller.selectSprite(filename),
-          );
+          return Obx(() => _buildSpriteCard(
+                key: ValueKey(filename),
+                context: context,
+                imageUrl: imageUrl,
+                filename: filename,
+                isSelected: controller.isSelected(filename),
+                onTap: () => controller.selectSprite(filename),
+              ));
         },
       );
     });
   }
 
   Widget _buildSpriteCard({
+    Key? key,
     required BuildContext context,
     bool isDefault = false,
     String? imageUrl,
@@ -535,6 +537,7 @@ class SpritesScreen extends StatelessWidget {
     required VoidCallback onTap,
   }) {
     return GestureDetector(
+      key: key,
       onTap: onTap,
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 200),

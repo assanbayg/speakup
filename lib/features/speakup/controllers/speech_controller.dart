@@ -162,16 +162,19 @@ class SpeechController extends GetxController {
         } else {
           Get.snackbar('Предупреждение', 'Не удалось распознать речь');
         }
+      } else if (response.statusCode == 400) {
+        Get.snackbar('Ошибка', 'Неверный формат аудио. Попробуйте ещё раз');
+      } else if (response.statusCode >= 500) {
+        Get.snackbar('Ошибка сервера', 'Сервер временно недоступен');
       } else {
-        throw Exception(
-            'Transcription failed with status ${response.statusCode}');
+        Get.snackbar('Ошибка распознавания', 'Не удалось распознать речь');
       }
     } on SocketException {
       Get.snackbar('Ошибка соединения', 'Не удается подключиться к серверу');
     } on TimeoutException {
       Get.snackbar('Превышено время ожидания', 'Сервер не отвечает');
     } catch (e) {
-      Get.snackbar('Ошибка транскрипции', 'Не удалось распознать речь: $e');
+      Get.snackbar('Ошибка транскрипции', 'Не удалось распознать речь');
       if (kDebugMode) {
         print('Error transcribing audio: $e');
       }

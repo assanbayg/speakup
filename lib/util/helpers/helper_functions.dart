@@ -56,7 +56,7 @@ class SHelperFunctions {
   static bool isEmailValid({required String email}) {
     /// Regular expression for validating email addresses
     final RegExp emailRegex = RegExp(
-      r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$',
+      r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,}$',
       caseSensitive: false,
       multiLine: false,
     );

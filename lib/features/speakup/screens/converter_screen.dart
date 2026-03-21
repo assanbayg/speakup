@@ -44,6 +44,7 @@ class _ConverterScreenState extends State<ConverterScreen> {
       appBar: const SAppBar(
         page: "Converter",
         title: "Конвертер",
+        subtitle: "Речь → Текст",
       ),
       body: Stack(
         children: [
