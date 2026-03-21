@@ -13,6 +13,7 @@ import 'package:speakup/features/speakup/screens/sprites_screen.dart';
 import 'package:speakup/features/speakup/screens/voice_screen.dart';
 import 'package:speakup/util/constants/colors.dart';
 import 'package:speakup/util/helpers/helper_functions.dart';
+import 'package:speakup/features/speakup/services/session_service.dart';
 import 'package:speakup/util/helpers/supabase_helper.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -26,11 +27,35 @@ class UserProfileScreen extends StatefulWidget {
 class _UserProfileScreenState extends State<UserProfileScreen> {
   UserModel? userModel;
   bool isLoading = true;
+  Map<String, dynamic>? _progress;
+  bool _progressLoading = true;
 
   @override
   void initState() {
     super.initState();
     _loadUserData();
+    _loadProgress();
+  }
+
+  Future<void> _loadProgress() async {
+    final userId = Supabase.instance.client.auth.currentUser?.id;
+    if (userId == null) {
+      setState(() => _progressLoading = false);
+      return;
+    }
+    final data = await SessionService.getProgress(userId);
+    setState(() {
+      _progress = data.isNotEmpty ? data : null;
+      _progressLoading = false;
+    });
+  }
+
+  String _formatDuration(int seconds) {
+    if (seconds < 60) return '$secondsс';
+    final h = seconds ~/ 3600;
+    final m = (seconds % 3600) ~/ 60;
+    if (h > 0) return '$hч $mм';
+    return '$mм';
   }
 
   Future<void> _loadUserData() async {
@@ -115,6 +140,12 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
 
             const SizedBox(height: 24),
 
+            // — Progress section
+            _sectionLabel('Прогресс'),
+            _progressSection(),
+
+            const SizedBox(height: 16),
+
             // — Section label
             _sectionLabel('Персонализация'),
 
@@ -167,6 +198,123 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
           ],
         ),
       ),
+    );
+  }
+
+  Widget _progressSection() {
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(14),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.04),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: _progressLoading
+          ? const Padding(
+              padding: EdgeInsets.all(24),
+              child: Center(
+                child: SizedBox(
+                  height: 20,
+                  width: 20,
+                  child: CircularProgressIndicator(strokeWidth: 2),
+                ),
+              ),
+            )
+          : _progress == null
+              ? Padding(
+                  padding: const EdgeInsets.all(20),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        'Не удалось загрузить',
+                        style: TextStyle(
+                          fontSize: 14,
+                          color: Colors.grey.shade500,
+                        ),
+                      ),
+                      GestureDetector(
+                        onTap: () {
+                          setState(() => _progressLoading = true);
+                          _loadProgress();
+                        },
+                        child: Text(
+                          'Повторить',
+                          style: TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w600,
+                            color: SColors.primary,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                )
+              : Padding(
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: 16, vertical: 20),
+                  child: Row(
+                    children: [
+                      _statCell(
+                        label: 'Сессии',
+                        value: '${_progress!['total_sessions'] ?? 0}',
+                      ),
+                      _statDivider(),
+                      _statCell(
+                        label: 'Время',
+                        value: _formatDuration(
+                            (_progress!['total_duration_seconds'] as num?)
+                                    ?.toInt() ??
+                                0),
+                      ),
+                      _statDivider(),
+                      _statCell(
+                        label: 'Сообщения',
+                        value: '${_progress!['total_messages'] ?? 0}',
+                      ),
+                    ],
+                  ),
+                ),
+    );
+  }
+
+  Widget _statCell({required String label, required String value}) {
+    return Expanded(
+      child: Column(
+        children: [
+          Text(
+            value,
+            style: const TextStyle(
+              fontSize: 22,
+              fontWeight: FontWeight.w700,
+              color: Color(0xFF1A1A2E),
+            ),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            label,
+            style: TextStyle(
+              fontSize: 12,
+              color: Colors.grey.shade500,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _statDivider() {
+    return Container(
+      width: 1,
+      height: 36,
+      color: Colors.grey.shade100,
     );
   }
 

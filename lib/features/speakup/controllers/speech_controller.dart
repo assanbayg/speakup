@@ -10,6 +10,8 @@ import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:record/record.dart';
 import 'package:speakup/features/speakup/controllers/text_to_speech_controller.dart';
+import 'package:speakup/features/speakup/services/session_service.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 class SpeechController extends GetxController {
   final _recorder = AudioRecorder();
@@ -18,6 +20,24 @@ class SpeechController extends GetxController {
   String? _recordingPath;
 
   final textController = Get.find<TextToSpeechController>();
+
+  final supabase = Supabase.instance.client;
+  String? _sessionId;
+  int _messageCount = 0;
+
+  Future<void> startSession() async {
+    _messageCount = 0;
+    final userId = supabase.auth.currentUser?.id;
+    if (userId == null) return;
+    _sessionId = await SessionService.startSession(userId);
+  }
+
+  Future<void> endSession() async {
+    if (_sessionId == null) return;
+    await SessionService.endSession(_sessionId!, _messageCount);
+    _sessionId = null;
+    _messageCount = 0;
+  }
 
   String get backendUrl => dotenv.env['BACKEND_URL'] ?? 'http://localhost:8000';
 
@@ -146,6 +166,7 @@ class SpeechController extends GetxController {
         final metrics = data['metrics'] as Map<String, dynamic>?;
 
         listenText.value = transcription;
+        _messageCount++;
 
         if (kDebugMode) {
           print('Transcription: $transcription');
