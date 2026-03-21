@@ -33,7 +33,6 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
     _loadUserData();
   }
 
-  // Load user data from Supabase
   Future<void> _loadUserData() async {
     try {
       if (SSupabaseHelper.currentUser != null) {
@@ -69,277 +68,237 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
     }
 
     return Scaffold(
+      backgroundColor: const Color(0xFFF7F7F9),
       appBar: const SAppBar(title: "Профиль", page: "Profile"),
       body: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 20.0),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              const SizedBox(height: 20),
-              Container(
-                width: 180,
-                height: 180,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  gradient: LinearGradient(
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                    colors: [
-                      Colors.blue.shade300,
-                      Colors.purple.shade300,
-                    ],
-                  ),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withValues(alpha: 0.15),
-                      blurRadius: 15,
-                      spreadRadius: 3,
-                      offset: const Offset(0, 5),
-                    ),
-                  ],
-                ),
-                child: Center(
-                  child: Container(
-                    width: 140,
-                    height: 140,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: Colors.white,
-                      border: Border.all(
-                        color: Colors.grey.shade200,
-                        width: 3,
-                      ),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withValues(alpha: 0.05),
-                          blurRadius: 10,
-                          offset: const Offset(0, 4),
-                        ),
-                      ],
-                    ),
-                    child: Center(
-                      child: SvgPicture.asset(
-                        'assets/icons/Person_fill.svg',
-                        width: 100,
-                        height: 100,
-                        colorFilter: ColorFilter.mode(
-                          Colors.blueGrey.shade700,
-                          BlendMode.srcIn,
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-              const SizedBox(height: 30),
-              // User Info Card
-              Container(
-                width: double.infinity,
-                padding: const EdgeInsets.all(24),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(20),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withValues(alpha: 0.08),
-                      blurRadius: 15,
-                      spreadRadius: 2,
-                      offset: const Offset(0, 5),
-                    ),
-                    BoxShadow(
-                      color: Colors.black.withValues(alpha: 0.04),
-                      blurRadius: 8,
-                      spreadRadius: 1,
-                      offset: const Offset(0, 2),
-                    ),
-                  ],
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // — Header block: name + email on a flat white surface
+            Container(
+              width: double.infinity,
+              color: Colors.white,
+              padding: const EdgeInsets.fromLTRB(24, 24, 24, 28),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  if (isLoading)
+                    const SizedBox(
+                      height: 20,
+                      width: 20,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    )
+                  else ...[
                     if (userModel?.displayName.isNotEmpty == true)
                       Text(
                         userModel!.displayName,
                         style: const TextStyle(
-                          fontSize: 24,
-                          color: Colors.black87,
-                          fontWeight: FontWeight.bold,
-                          letterSpacing: 0.5,
-                        ),
-                        textAlign: TextAlign.center,
-                      ),
-                    if (userModel?.displayName.isNotEmpty == true)
-                      const SizedBox(height: 12),
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 16,
-                        vertical: 10,
-                      ),
-                      decoration: BoxDecoration(
-                        color: Colors.grey.shade50,
-                        borderRadius: BorderRadius.circular(12),
-                        border: Border.all(
-                          color: Colors.grey.shade200,
-                          width: 1,
+                          fontSize: 22,
+                          fontWeight: FontWeight.w700,
+                          color: Color(0xFF1A1A2E),
+                          letterSpacing: -0.3,
                         ),
                       ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Icon(
-                            Icons.email_outlined,
-                            size: 18,
-                            color: Colors.grey.shade600,
-                          ),
-                          const SizedBox(width: 8),
-                          Flexible(
-                            child: Text(
-                              user.email ?? 'Нет электронной почты',
-                              style: TextStyle(
-                                fontSize: 16,
-                                color: Colors.grey.shade700,
-                                fontWeight: FontWeight.w500,
-                              ),
-                              textAlign: TextAlign.center,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                          ),
-                        ],
+                    const SizedBox(height: 4),
+                    Text(
+                      user.email ?? '',
+                      style: TextStyle(
+                        fontSize: 14,
+                        color: Colors.grey.shade500,
+                        fontWeight: FontWeight.w500,
                       ),
                     ),
                   ],
-                ),
+                ],
               ),
-              const SizedBox(height: 20),
-              // Sprites Button
-              _buildActionButton(
+            ),
+
+            const SizedBox(height: 24),
+
+            // — Section label
+            _sectionLabel('Персонализация'),
+
+            // — Settings group
+            _settingsGroup([
+              _settingsTile(
                 icon: 'assets/icons/Edit.svg',
                 label: 'Мои персонажи',
-                color: SColors.primary,
-                onPressed: () => Get.to(() => const SpritesScreen()),
+                onTap: () => Get.to(() => const SpritesScreen()),
               ),
-              const SizedBox(height: 16),
-              // Voice Selection Button
-              _buildActionButton(
+              _settingsTile(
                 icon: 'assets/icons/Audio.svg',
                 label: 'Выбор голоса',
-                color: Colors.teal,
-                onPressed: () => Get.to(() => const SpeakersScreen()),
+                onTap: () => Get.to(() => const SpeakersScreen()),
               ),
-              const SizedBox(height: 16),
-              // Voice Cloning Button - NEW
-              _buildActionButton(
+              _settingsTile(
                 icon: 'assets/icons/Audio.svg',
                 label: 'Мой голос',
                 subtitle: 'Клонирование голоса родителя',
-                color: Colors.deepPurple,
-                onPressed: () => Get.to(() => const VoiceScreen()),
+                onTap: () => Get.to(() => const VoiceScreen()),
+                isLast: true,
               ),
-              const SizedBox(height: 16),
-              // Logout Button
-              _buildActionButton(
+            ]),
+
+            const SizedBox(height: 16),
+
+            _sectionLabel('Аккаунт'),
+
+            _settingsGroup([
+              _settingsTile(
                 icon: 'assets/icons/Out_right.svg',
                 label: 'Выйти из аккаунта',
-                color: Colors.blue,
-                onPressed: () async {
+                onTap: () async {
                   await SSupabaseHelper.auth.signOut();
                   Get.offAll(const LoginScreen());
                 },
               ),
-              const SizedBox(height: 16),
-              // Delete Account Button
-              _buildActionButton(
+              _settingsTile(
                 icon: 'assets/icons/Delete.svg',
                 label: 'Удалить аккаунт',
-                color: Colors.red,
-                onPressed: () => _confirmDeleteAccount(),
+                labelColor: Colors.red.shade600,
+                iconColor: Colors.red.shade500,
+                onTap: () => _confirmDeleteAccount(),
+                showChevron: false,
+                isLast: true,
               ),
-              const SizedBox(height: 20),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
+            ]),
 
-  Widget _buildActionButton({
-    required String icon,
-    required String label,
-    String? subtitle,
-    required Color color,
-    required VoidCallback onPressed,
-  }) {
-    return Container(
-      width: double.infinity,
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: color.withValues(alpha: 0.2),
-            blurRadius: 12,
-            spreadRadius: 2,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      child: ElevatedButton(
-        onPressed: onPressed,
-        style: ElevatedButton.styleFrom(
-          backgroundColor: color,
-          foregroundColor: Colors.white,
-          padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 20),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(16),
-          ),
-          elevation: 0,
-        ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            SvgPicture.asset(
-              icon,
-              width: 20,
-              height: 20,
-              colorFilter: const ColorFilter.mode(
-                Colors.white,
-                BlendMode.srcIn,
-              ),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    label,
-                    style: const TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w600,
-                      letterSpacing: 0.5,
-                    ),
-                  ),
-                  if (subtitle != null)
-                    Text(
-                      subtitle,
-                      style: TextStyle(
-                        fontSize: 12,
-                        fontWeight: FontWeight.w400,
-                        color: Colors.white.withValues(alpha: 0.8),
-                      ),
-                    ),
-                ],
-              ),
-            ),
-            const Icon(Icons.chevron_right, size: 20),
+            const SizedBox(height: 40),
           ],
         ),
       ),
     );
   }
 
-  // Confirmation dialog for account deletion
+  Widget _sectionLabel(String text) {
+    return Padding(
+      padding: const EdgeInsets.only(left: 24, bottom: 8),
+      child: Text(
+        text.toUpperCase(),
+        style: TextStyle(
+          fontSize: 11,
+          fontWeight: FontWeight.w700,
+          color: Colors.grey.shade400,
+          letterSpacing: 1.2,
+        ),
+      ),
+    );
+  }
+
+  Widget _settingsGroup(List<Widget> tiles) {
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(14),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.04),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Column(children: tiles),
+    );
+  }
+
+  Widget _settingsTile({
+    required String icon,
+    required String label,
+    String? subtitle,
+    required VoidCallback onTap,
+    Color? labelColor,
+    Color? iconColor,
+    bool showChevron = true,
+    bool isLast = false,
+  }) {
+    final effectiveIconColor = iconColor ?? SColors.primary;
+    final effectiveLabelColor = labelColor ?? const Color(0xFF1A1A2E);
+
+    return InkWell(
+      onTap: onTap,
+      borderRadius: isLast
+          ? const BorderRadius.only(
+              bottomLeft: Radius.circular(14),
+              bottomRight: Radius.circular(14),
+            )
+          : BorderRadius.zero,
+      child: Column(
+        children: [
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+            child: Row(
+              children: [
+                // Icon container — small, subtle
+                Container(
+                  width: 34,
+                  height: 34,
+                  decoration: BoxDecoration(
+                    color: effectiveIconColor.withValues(alpha: 0.08),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Center(
+                    child: SvgPicture.asset(
+                      icon,
+                      width: 18,
+                      height: 18,
+                      colorFilter: ColorFilter.mode(
+                        effectiveIconColor,
+                        BlendMode.srcIn,
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 14),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        label,
+                        style: TextStyle(
+                          fontSize: 15,
+                          fontWeight: FontWeight.w600,
+                          color: effectiveLabelColor,
+                        ),
+                      ),
+                      if (subtitle != null) ...[
+                        const SizedBox(height: 2),
+                        Text(
+                          subtitle,
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: Colors.grey.shade500,
+                            fontWeight: FontWeight.w400,
+                          ),
+                        ),
+                      ],
+                    ],
+                  ),
+                ),
+                if (showChevron)
+                  Icon(
+                    Icons.chevron_right,
+                    size: 18,
+                    color: Colors.grey.shade300,
+                  ),
+              ],
+            ),
+          ),
+          if (!isLast)
+            Divider(
+              height: 1,
+              thickness: 1,
+              indent: 64,
+              endIndent: 0,
+              color: Colors.grey.shade100,
+            ),
+        ],
+      ),
+    );
+  }
+
   void _confirmDeleteAccount() {
     showDialog(
       context: context,
@@ -355,9 +314,10 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
             ),
             TextButton(
               onPressed: () {
-                Navigator.of(context).pop(); // Close the dialog
-                _deleteAccount(); // Proceed with deletion
+                Navigator.of(context).pop();
+                _deleteAccount();
               },
+              style: TextButton.styleFrom(foregroundColor: Colors.red),
               child: const Text('Удалить'),
             ),
           ],
