@@ -326,7 +326,9 @@ class VoiceScreen extends StatelessWidget {
   }
 
   Widget _buildReadyToRecord(BuildContext context, VoiceController controller) {
-    return Column(
+    return SizedBox(
+      width: double.infinity,
+      child: Column(
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
         const SizedBox(height: 16),
@@ -363,6 +365,7 @@ class VoiceScreen extends StatelessWidget {
         ),
         const SizedBox(height: 8),
       ],
+      ),
     );
   }
 
