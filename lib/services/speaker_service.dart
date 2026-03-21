@@ -44,7 +44,8 @@ class SpeakerService {
     }
   }
 
-  /// Fetch a short TTS audio preview for a given speaker voice.
+  /// Fetch a TTS preview clip for the given speaker.
+  /// Timeout is 60s because XTTS on CPU takes 10-20s to synthesise.
   static Future<List<int>?> previewSpeaker(String speakerId) async {
     try {
       final response = await http
@@ -52,13 +53,17 @@ class SpeakerService {
             Uri.parse('$_baseUrl/tts'),
             headers: {'Content-Type': 'application/json'},
             body: jsonEncode({
-              'text': 'Привет! Меня зовут Спичи. Давай поговорим!',
+              'text': 'Привет! Давай поговорим.',
               'voice': speakerId,
             }),
           )
-          .timeout(const Duration(seconds: 30));
+          .timeout(const Duration(seconds: 60));
       if (response.statusCode == 200 && response.bodyBytes.isNotEmpty) {
         return response.bodyBytes;
+      }
+      if (kDebugMode) {
+        print('Preview response: ${response.statusCode}, '
+            'body length: ${response.bodyBytes.length}');
       }
       return null;
     } catch (e) {

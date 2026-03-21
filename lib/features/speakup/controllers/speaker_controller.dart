@@ -12,8 +12,12 @@ class SpeakerController extends GetxController {
   final Rx<Speaker?> selectedSpeaker = Rx<Speaker?>(null);
   final RxBool isLoading = false.obs;
 
-  // Preview state
-  final Rx<String?> previewingId = Rx<String?>(null);
+  // null = idle, set = fetching audio for this speaker id
+  final Rx<String?> loadingPreviewId = Rx<String?>(null);
+
+  // null = nothing playing, set = this speaker's audio is playing
+  final Rx<String?> playingPreviewId = Rx<String?>(null);
+
   final _player = AudioPlayer();
 
   @override
@@ -21,7 +25,7 @@ class SpeakerController extends GetxController {
     super.onInit();
     loadSpeakers();
     _player.onPlayerComplete.listen((_) {
-      previewingId.value = null;
+      playingPreviewId.value = null;
     });
   }
 
@@ -49,45 +53,58 @@ class SpeakerController extends GetxController {
   }
 
   String? get selectedSpeakerId => selectedSpeaker.value?.id;
-
   bool isSelected(Speaker speaker) => selectedSpeaker.value?.id == speaker.id;
+  bool isLoadingPreview(Speaker speaker) =>
+      loadingPreviewId.value == speaker.id;
+  bool isPlayingPreview(Speaker speaker) =>
+      playingPreviewId.value == speaker.id;
 
-  bool isPreviewing(Speaker speaker) => previewingId.value == speaker.id;
-
-  /// Toggle preview for a speaker. Stops if already playing this one.
   Future<void> togglePreview(Speaker speaker) async {
-    // Already previewing this speaker — stop
-    if (previewingId.value == speaker.id) {
+    // Already playing this one — stop it
+    if (playingPreviewId.value == speaker.id) {
       await _player.stop();
-      previewingId.value = null;
+      playingPreviewId.value = null;
       return;
     }
 
-    // Stop any current preview first
+    // Already loading this one — ignore double tap
+    if (loadingPreviewId.value == speaker.id) return;
+
+    // Stop any other playback
     await _player.stop();
-    previewingId.value = speaker.id;
+    playingPreviewId.value = null;
+
+    loadingPreviewId.value = speaker.id;
 
     try {
       final bytes = await SpeakerService.previewSpeaker(speaker.id);
+
+      // User cancelled while we were waiting
+      if (loadingPreviewId.value != speaker.id) return;
+
       if (bytes == null || bytes.isEmpty) {
-        previewingId.value = null;
         SHelperFunctions.showSnackBar('Не удалось загрузить предпросмотр');
         return;
       }
 
-      // Write to temp file and play
       final tempDir = await getTemporaryDirectory();
-      final file = File('${tempDir.path}/speaker_preview_${speaker.id}.mp3');
+      // Sanitise ID for use in filename
+      final safeId = speaker.id.replaceAll(RegExp(r'[^a-zA-Z0-9]'), '_');
+      final file = File('${tempDir.path}/speaker_preview_$safeId.mp3');
       await file.writeAsBytes(bytes);
 
-      // Check that this preview is still wanted (user may have tapped elsewhere)
-      if (previewingId.value != speaker.id) return;
+      if (loadingPreviewId.value != speaker.id) return;
 
+      loadingPreviewId.value = null;
+      playingPreviewId.value = speaker.id;
       await _player.play(DeviceFileSource(file.path));
     } catch (e) {
-      previewingId.value = null;
       if (kDebugMode) print('Preview error: $e');
-      SHelperFunctions.showSnackBar('Ошибка предпросмотра');
+      SHelperFunctions.showSnackBar('Ошибка предпросмотра — попробуйте позже');
+    } finally {
+      if (loadingPreviewId.value == speaker.id) {
+        loadingPreviewId.value = null;
+      }
     }
   }
 }

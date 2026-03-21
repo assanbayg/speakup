@@ -31,9 +31,10 @@ class SpeakersScreen extends StatelessWidget {
               const SizedBox(height: 6),
               Text(
                 'Нажмите ▶ чтобы послушать голос перед выбором',
-                style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: Colors.grey.shade500,
-                    ),
+                style: Theme.of(context)
+                    .textTheme
+                    .bodySmall
+                    ?.copyWith(color: Colors.grey.shade500),
               ),
               const SizedBox(height: SSizes.spaceBtwItems),
               _buildSpeakersList(context, controller),
@@ -65,13 +66,11 @@ class SpeakersScreen extends StatelessWidget {
               color: SColors.primary.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(12),
             ),
-            child: SvgPicture.asset(
-              'assets/icons/Audio.svg',
-              width: 24,
-              height: 24,
-              colorFilter:
-                  const ColorFilter.mode(SColors.primary, BlendMode.srcIn),
-            ),
+            child: SvgPicture.asset('assets/icons/Audio.svg',
+                width: 24,
+                height: 24,
+                colorFilter:
+                    const ColorFilter.mode(SColors.primary, BlendMode.srcIn)),
           ),
           const SizedBox(width: 12),
           Expanded(
@@ -145,8 +144,8 @@ class SpeakersScreen extends StatelessWidget {
   ) {
     return Obx(() {
       final isSelected = controller.isSelected(speaker);
-      final isPreviewing = controller.isPreviewing(speaker);
-      final isAnyPreviewing = controller.previewingId.value != null;
+      final isLoading = controller.isLoadingPreview(speaker);
+      final isPlaying = controller.isPlayingPreview(speaker);
 
       return AnimatedContainer(
         duration: const Duration(milliseconds: 200),
@@ -170,7 +169,7 @@ class SpeakersScreen extends StatelessWidget {
         ),
         child: Row(
           children: [
-            // Icon
+            // Speaker icon
             Container(
               width: 50,
               height: 50,
@@ -180,15 +179,13 @@ class SpeakersScreen extends StatelessWidget {
                     : Colors.grey.shade100,
                 borderRadius: BorderRadius.circular(12),
               ),
-              child: Icon(
-                Icons.record_voice_over,
-                color: isSelected ? SColors.primary : Colors.grey.shade600,
-                size: 24,
-              ),
+              child: Icon(Icons.record_voice_over,
+                  color: isSelected ? SColors.primary : Colors.grey.shade600,
+                  size: 24),
             ),
             const SizedBox(width: 16),
 
-            // Name — tapping here selects the speaker
+            // Name — tap to select
             Expanded(
               child: GestureDetector(
                 onTap: () => controller.selectSpeaker(speaker),
@@ -204,16 +201,16 @@ class SpeakersScreen extends StatelessWidget {
               ),
             ),
 
-            // Preview button
+            // Preview button — three states: loading spinner / stop / play
             _PreviewButton(
-              isPreviewing: isPreviewing,
-              isLoadingPreview: isAnyPreviewing && !isPreviewing,
+              isLoading: isLoading,
+              isPlaying: isPlaying,
               onTap: () => controller.togglePreview(speaker),
             ),
 
             const SizedBox(width: 4),
 
-            // Selection checkmark
+            // Selection indicator
             if (isSelected)
               Container(
                 padding: const EdgeInsets.all(4),
@@ -222,7 +219,6 @@ class SpeakersScreen extends StatelessWidget {
                 child: const Icon(Icons.check, color: Colors.white, size: 16),
               )
             else
-              // Tap to select affordance
               GestureDetector(
                 onTap: () => controller.selectSpeaker(speaker),
                 child: Container(
@@ -243,37 +239,48 @@ class SpeakersScreen extends StatelessWidget {
 
 class _PreviewButton extends StatelessWidget {
   const _PreviewButton({
-    required this.isPreviewing,
-    required this.isLoadingPreview,
+    required this.isLoading,
+    required this.isPlaying,
     required this.onTap,
   });
 
-  final bool isPreviewing;
-  final bool isLoadingPreview;
+  final bool isLoading;
+  final bool isPlaying;
   final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
     return Tooltip(
-      message: isPreviewing ? 'Остановить' : 'Прослушать',
+      message: isPlaying ? 'Остановить' : 'Прослушать',
       child: InkWell(
-        onTap: isLoadingPreview ? null : onTap,
+        onTap: isLoading ? null : onTap,
         borderRadius: BorderRadius.circular(24),
         child: Padding(
           padding: const EdgeInsets.all(8.0),
-          child: AnimatedSwitcher(
-            duration: const Duration(milliseconds: 200),
-            child: isPreviewing
-                ? const Icon(Icons.stop_circle_outlined,
-                    key: ValueKey('stop'), color: SColors.primary, size: 28)
-                : Icon(
-                    Icons.play_circle_outline,
-                    key: const ValueKey('play'),
-                    color: isLoadingPreview
-                        ? Colors.grey.shade300
-                        : SColors.primary,
-                    size: 28,
-                  ),
+          child: SizedBox(
+            width: 28,
+            height: 28,
+            child: AnimatedSwitcher(
+              duration: const Duration(milliseconds: 200),
+              child: isLoading
+                  ? const Padding(
+                      key: ValueKey('loading'),
+                      padding: EdgeInsets.all(4),
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2.5,
+                        color: SColors.primary,
+                      ),
+                    )
+                  : isPlaying
+                      ? const Icon(Icons.stop_circle_outlined,
+                          key: ValueKey('stop'),
+                          color: SColors.primary,
+                          size: 28)
+                      : const Icon(Icons.play_circle_outline,
+                          key: ValueKey('play'),
+                          color: SColors.primary,
+                          size: 28),
+            ),
           ),
         ),
       ),
