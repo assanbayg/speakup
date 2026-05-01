@@ -244,7 +244,7 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
                           setState(() => _progressLoading = true);
                           _loadProgress();
                         },
-                        child: Text(
+                        child: const Text(
                           'Повторить',
                           style: TextStyle(
                             fontSize: 14,

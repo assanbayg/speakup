@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:speakup/features/authentication/screens/login_screen.dart';
 import 'package:speakup/features/speakup/screens/main_navigation_screen.dart';
 import 'package:speakup/util/constants/colors.dart';
+import 'package:speakup/util/helpers/supabase_helper.dart';
 
 /// Data model for a single onboarding page.
 class _OnboardingPage {
@@ -122,7 +124,11 @@ class _OnboardingScreenState extends State<OnboardingScreen>
 
   Future<void> _finish() async {
     await OnboardingScreen.markCompleted();
-    Get.offAll(() => const MainNavigationScreen());
+    if (SSupabaseHelper.currentUser != null) {
+      Get.offAll(() => const MainNavigationScreen());
+    } else {
+      Get.offAll(() => const LoginScreen());
+    }
   }
 
   @override
