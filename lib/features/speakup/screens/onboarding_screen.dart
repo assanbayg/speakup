@@ -415,13 +415,16 @@ class _OnboardingScreenState extends State<OnboardingScreen>
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(27),
             ),
-            textStyle: const TextStyle(
+          ),
+          child: const Text(
+            'Начать разговор',
+            style: TextStyle(
               fontFamily: 'Quicksand',
               fontSize: 16,
               fontWeight: FontWeight.w700,
+              height: 1.0,
             ),
           ),
-          child: const Text('Начать разговор'),
         ),
       );
     }
@@ -440,13 +443,16 @@ class _OnboardingScreenState extends State<OnboardingScreen>
                 borderRadius: BorderRadius.circular(27),
               ),
               padding: const EdgeInsets.symmetric(horizontal: 24),
-              textStyle: const TextStyle(
+            ),
+            child: const Text(
+              'Пропустить',
+              style: TextStyle(
                 fontFamily: 'Quicksand',
                 fontSize: 15,
                 fontWeight: FontWeight.w600,
+                height: 1.0,
               ),
             ),
-            child: const Text('Пропустить'),
           ),
         ),
         const SizedBox(width: 12),
@@ -463,13 +469,16 @@ class _OnboardingScreenState extends State<OnboardingScreen>
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(27),
                 ),
-                textStyle: const TextStyle(
+              ),
+              child: const Text(
+                'Далее',
+                style: TextStyle(
                   fontFamily: 'Quicksand',
                   fontSize: 16,
                   fontWeight: FontWeight.w700,
+                  height: 1.0,
                 ),
               ),
-              child: const Text('Далее'),
             ),
           ),
         ),
